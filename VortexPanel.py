@@ -43,19 +43,23 @@ class Panel(object):
         
         self.A = np.array([(x3-x1), (y3-y1), (z3-z1)]).T # Panel diagonal
         self.B = np.array([(x4-x2), (y4-y2), (z4-z2)]).T # Panel diagonal
-        self.S = np.abs(np.cross(self.A, self.B))/2 # Perpendicular vector
+        self.n = np.abs(np.cross(self.A, self.B))/2 # Normal vector
         
         # Longitudinal unit vector
-        ux = (x1+x2-x3-x4)/2
-        uy = (y1+y2-y3-y4)/2
-        uz = (z1+z2-z3-z4)/2
+        self.ux = (x1+x2-x3-x4)/2
+        self.uy = (y1+y2-y3-y4)/2
+        self.uz = (z1+z2-z3-z4)/2
+        self.u = np.array([self.ux, self.uy, self.uz])
         
         # Transverse unit vector
-        px = (x2+x3-x4-x1)/2
-        py = (y2+y3-y4-y1)/2
-        pz = (z2+z3-z4-z1)/2
+        self.px = (x2+x3-x4-x1)/2
+        self.py = (y2+y3-y4-y1)/2
+        self.pz = (z2+z3-z4-z1)/2
+        self.p = np.array([self.px, self.py, self.pz])
         
-        self.gamma = 0 # Panel vortex strength
+        self.o = np.cross(self.n, self.u)
+        
+        self.gamma = self.calc_gamma()
     
     def plot(self):
         """
@@ -67,7 +71,24 @@ class Panel(object):
         verts = [list(zip(self.x, self.y, self.z))]
         ax.add_collection3d(Poly3DCollection(verts))
         plt.show()
+    
+    def calc_gamma(self, U=np.array([1,1,1])):
+        """
+        Calculates the source strength, sigma.
+        """
+        sigma = np.dot(self.n, U)
+        return sigma
 
+    def transform_local(self, global_coords):
+        """
+        
+        """
+        transform_matrix = np.array([self.u,
+                                     self.o,
+                                     np.zeros(3)])#
+        print(transform_matrix)
+        return np.matmul(transform_matrix,global_coords)\
+        
 
 class panels(object):
     """
@@ -83,12 +104,22 @@ class panels(object):
         
     def _construct_A_b(self):
         """
-        """
+        Construct the linear system to enforce no-slip on every panel
         
-    def get_array(self):
+        Outputs:
+        A - dipole influence coefficient matrix
+        b - source influence coefficient patrix
+        """
+        xc,yc,zc,sx,sy,sz = self.get_array('xc','yc','zc','sx','sy','sz')
+        
+    def get_array(self, key, *args):
         """
         """
+        if not args:
+            return np.array([getattr(p,key) for p in self.panels])
+        else:
+            return [self.get_array(k) for k in (key,)+args]
 
 
-one_panel = Panel(0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0)
+one_panel = Panel(0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1)
 pans = panels([one_panel])
