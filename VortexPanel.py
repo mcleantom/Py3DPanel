@@ -30,36 +30,44 @@ class Panel(object):
         A panel object.
     """
     
-    def __init__(self, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4):
+    def __init__(self, points, gamma=1):
         """
+        
         """
-        self.x = (x1, x2, x3, x4) # Quadrilateral x coordinates
-        self.y = (y1, y2, y3, y4) # Quadrilateral y coordinates
-        self.z = (z1, z2, z3, z4) # Quadrilateral z coordinates
+        self.points = points # Copy of points, make it a np array
+        
+        self.x = points[:,0] # Quadrilateral x coordinates
+        self.y = points[:,1] # Quadrilateral y coordinates
+        self.z = points[:,2] # Quadrilateral z coordinates
         
         self.cx = sum(self.x)/4 # Panel centre x coordinate
         self.cy = sum(self.y)/4 # Panel centre y coordinate
         self.cz = sum(self.z)/4 # Panel centre z coordinate
         
-        self.A = np.array([(x3-x1), (y3-y1), (z3-z1)]).T # Panel diagonal
-        self.B = np.array([(x4-x2), (y4-y2), (z4-z2)]).T # Panel diagonal
+        self.A = np.array([(self.x[2]-self.x[0]),
+                           (self.y[2]-self.y[0]),
+                           (self.z[2]-self.z[0])]).T # Panel diagonal
+        self.B = np.array([(self.x[3]-self.x[1]),
+                           (self.y[3]-self.y[1]),
+                           (self.z[3]-self.z[1])]).T # Panel diagonal
         self.n = np.abs(np.cross(self.A, self.B))/2 # Normal vector
         
-        # Longitudinal unit vector
-        self.ux = (x1+x2-x3-x4)/2
-        self.uy = (y1+y2-y3-y4)/2
-        self.uz = (z1+z2-z3-z4)/2
+        # # Longitudinal unit vector
+        self.ux = (self.x[0]+self.x[1]-self.x[2]-self.x[3])/2
+        self.uy = (self.y[0]+self.y[1]-self.y[2]-self.y[3])/2
+        self.uz = (self.z[0]+self.z[1]-self.z[2]-self.z[3])/2
         self.u = np.array([self.ux, self.uy, self.uz])
         
-        # Transverse unit vector
-        self.px = (x2+x3-x4-x1)/2
-        self.py = (y2+y3-y4-y1)/2
-        self.pz = (z2+z3-z4-z1)/2
+        # # Transverse unit vector
+        self.px = (self.x[1]+self.x[2]-self.x[3]-self.x[0])/2
+        self.py = (self.y[1]+self.y[2]-self.y[3]-self.y[0])/2
+        self.pz = (self.z[1]+self.z[2]-self.z[3]-self.z[0])/2
         self.p = np.array([self.px, self.py, self.pz])
         
         self.o = np.cross(self.n, self.u)
         
-        self.gamma = self.calc_gamma()
+        self.gamma = gamma
+        self.sigma = self.calc_sigma()
     
     def plot(self):
         """
@@ -72,7 +80,7 @@ class Panel(object):
         ax.add_collection3d(Poly3DCollection(verts))
         plt.show()
     
-    def calc_gamma(self, U=np.array([1,1,1])):
+    def calc_sigma(self, U=np.array([1,0,0])):
         """
         Calculates the source strength, sigma.
         """
@@ -120,6 +128,9 @@ class panels(object):
         else:
             return [self.get_array(k) for k in (key,)+args]
 
-
-one_panel = Panel(0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1)
+corners = np.array([[0,0,1],
+                    [1,0,1],
+                    [1,1,1],
+                    [0,1,1]])
+one_panel = Panel(corners)
 pans = panels([one_panel])
