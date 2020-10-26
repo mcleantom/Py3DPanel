@@ -47,15 +47,17 @@ class Panel(object):
         self.A = np.array([(self.x[2]-self.x[0]),
                            (self.y[2]-self.y[0]),
                            (self.z[2]-self.z[0])]).T # Panel diagonal
+        
         self.B = np.array([(self.x[3]-self.x[1]),
                            (self.y[3]-self.y[1]),
                            (self.z[3]-self.z[1])]).T # Panel diagonal
+        
         self.n = np.abs(np.cross(self.A, self.B))/2 # Normal vector
         
         # # Longitudinal unit vector
-        self.ux = (self.x[0]+self.x[1]-self.x[2]-self.x[3])/2
-        self.uy = (self.y[0]+self.y[1]-self.y[2]-self.y[3])/2
-        self.uz = (self.z[0]+self.z[1]-self.z[2]-self.z[3])/2
+        self.ux = -(self.x[0]+self.x[1]-self.x[2]-self.x[3])/2
+        self.uy = -(self.y[0]+self.y[1]-self.y[2]-self.y[3])/2
+        self.uz = -(self.z[0]+self.z[1]-self.z[2]-self.z[3])/2
         self.u = np.array([self.ux, self.uy, self.uz])
         
         # # Transverse unit vector
@@ -64,7 +66,9 @@ class Panel(object):
         self.pz = (self.z[1]+self.z[2]-self.z[3]-self.z[0])/2
         self.p = np.array([self.px, self.py, self.pz])
         
-        self.o = np.cross(self.n, self.u)
+        self.o = np.cross(self.n, self.u) 
+        
+        self.S = np.abs(np.cross(self.A, self.B))/2
         
         self.gamma = gamma
         self.sigma = self.calc_sigma()
@@ -87,7 +91,7 @@ class Panel(object):
         sigma = np.dot(self.n, U)
         return sigma
 
-    def transform_local(self, global_coords):
+    def transform_to_local(self, global_coords):
         """
         
         """
@@ -95,7 +99,12 @@ class Panel(object):
                                      self.o,
                                      np.zeros(3)])#
         print(transform_matrix)
-        return np.matmul(transform_matrix,global_coords)\
+        return np.matmul(transform_matrix,global_coords)
+    
+    def transform_to_global(self, local_coordinates):
+        """
+        
+        """
         
 
 class panels(object):
@@ -130,7 +139,8 @@ class panels(object):
 
 corners = np.array([[0,0,1],
                     [1,0,1],
-                    [1,1,1],
-                    [0,1,1]])
+                    [1,0.5,1],
+                    [0,0.5,1]])
 one_panel = Panel(corners)
+one_panel.plot()
 pans = panels([one_panel])
