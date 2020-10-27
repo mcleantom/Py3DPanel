@@ -43,6 +43,7 @@ class Panel(object):
         self.cx = sum(self.x)/4 # Panel centre x coordinate
         self.cy = sum(self.y)/4 # Panel centre y coordinate
         self.cz = sum(self.z)/4 # Panel centre z coordinate
+        self.c = np.array([[self.cx], [self.cy], [self.cz]])
         
         self.A = np.array([(self.x[2]-self.x[0]),
                            (self.y[2]-self.y[0]),
@@ -124,10 +125,9 @@ class panels(object):
         Construct the linear system to enforce no-slip on every panel
         
         Outputs:
-        A - dipole influence coefficient matrix
-        b - source influence coefficient patrix
+        Aij - The influence of the vorticity components from panel j on panel i
+        b - The influence of the freestream on panel i
         """
-        xc,yc,zc,sx,sy,sz = self.get_array('xc','yc','zc','sx','sy','sz')
         
     def get_array(self, key, *args):
         """
