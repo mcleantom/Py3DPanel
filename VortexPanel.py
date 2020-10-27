@@ -94,20 +94,32 @@ class Panel(object):
 
     def transform_to_local(self, global_coords):
         """
-        
+        Parameters
+        ----------
+        global_coords : np array
+            Coordinate points in the format [x, y, z]
+
+        Returns
+        -------
+        result : np array
+            Coordinate points in the format [x, y, z]
+
         """
-        transform_matrix = np.array([self.u,
-                                     self.o,
-                                     np.zeros(3)])#
-        print(transform_matrix)
-        return np.matmul(transform_matrix,global_coords)
+        
+        direction_vector = global_coords - self.c.T
+        print(direction_vector)
+        z = np.dot(self.n, direction_vector.T)
+        x = np.dot(self.u, direction_vector.T)
+        y = np.dot(self.p, direction_vector.T)
+        result = np.array([x, y, z])
+        print(result)
+        return result.T
     
     def transform_to_global(self, local_coordinates):
         """
-        
         """
         
-
+        
 class panels(object):
     """
     """
@@ -137,10 +149,10 @@ class panels(object):
         else:
             return [self.get_array(k) for k in (key,)+args]
 
-corners = np.array([[0,0,1],
-                    [1,0,1],
-                    [1,0.5,1],
-                    [0,0.5,1]])
+corners = np.array([[0,0,0],
+                    [1,0,0],
+                    [1,1,1],
+                    [0,1,1]])
 one_panel = Panel(corners)
 one_panel.plot()
 pans = panels([one_panel])
